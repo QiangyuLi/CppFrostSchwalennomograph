@@ -69,6 +69,28 @@ fi
 
 echo ""
 
+# Test 4: Table validation
+echo "📋 Test 4: Table Validation"
+echo "🔧 Compiling..."
+g++ -std=c++17 -o test_table_validation test_table_validation.cpp
+
+if [ $? -ne 0 ]; then
+    echo "❌ Table validation compilation failed."
+    exit 1
+fi
+
+echo "✅ Running..."
+./test_table_validation
+TABLE_EXIT_CODE=$?
+
+if [ $TABLE_EXIT_CODE -eq 0 ]; then
+    echo "✅ Table validation test passed."
+else
+    echo "❌ Table validation test failed."
+fi
+
+echo ""
+
 # Summary
 echo "📊 Test Summary:"
 if [ $ORIG_EXIT_CODE -eq 0 ]; then
@@ -89,8 +111,21 @@ else
     echo "❌ Validated solver: FAILED"
 fi
 
+if [ $TABLE_EXIT_CODE -eq 0 ]; then
+    echo "✅ Table validation: PASSED"
+else
+    echo "❌ Table validation: FAILED"
+fi
+
 echo ""
 echo "🧹 Cleaning up..."
-rm -f test_solver
+rm -f test_solver test_compact_solver test_validated_solver test_table_validation
 
-exit $TEST_EXIT_CODE
+# Check overall result
+if [ $ORIG_EXIT_CODE -eq 0 ] && [ $COMPACT_EXIT_CODE -eq 0 ] && [ $VALIDATED_EXIT_CODE -eq 0 ] && [ $TABLE_EXIT_CODE -eq 0 ]; then
+    echo "🎉 All tests passed!"
+    exit 0
+else
+    echo "❌ Some tests failed."
+    exit 1
+fi
