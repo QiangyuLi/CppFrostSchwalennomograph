@@ -1,3 +1,18 @@
+/*
+ * Table Validation Test Suite
+ * 
+ * This test suite validates the evaporation loss solver against reference validation data from:
+ * 
+ * CITATION:
+ * Trimmer, Walter L. (1987). "Sprinkler Evaporation Loss Equation." 
+ * Journal of Irrigation and Drainage Engineering, Vol. 113, Issue 4, pp. 616-624.
+ * https://doi.org/10.1061/(ASCE)0733-9437(1987)113:4(616)
+ * Published: November 1, 1987
+ * 
+ * The test cases are derived from the validation table presented in this seminal work
+ * on sprinkler evaporation loss calculations.
+ */
+
 #include <iostream>
 #include <cmath>
 #include <cassert>
@@ -43,10 +58,13 @@ void testTableValidation() {
     std::cout << "=== Table Validation Tests ===" << std::endl;
     std::cout << "Testing solver against EXACT validation table data" << std::endl;
     std::cout << "Target values from Column 5: E (%) - Expected evaporation loss" << std::endl;
+    std::cout << "Source: Trimmer, W.L. (1987). Journal of Irrigation and Drainage Engineering" << std::endl;
+    std::cout << "https://doi.org/10.1061/(ASCE)0733-9437(1987)113:4(616)" << std::endl;
     std::cout << std::endl;
     
-    // Test cases from the validation table - EXACT DATA FROM YOUR TABLE
+    // Test cases from the validation table - EXACT DATA FROM TRIMMER (1987)
     // Column mapping: D(mm) | h(kPa) | es-e(kPa) | W(m/s) | E(%) <- TARGET VALUE
+    // Source: Trimmer, W.L. (1987). "Sprinkler Evaporation Loss Equation."
     std::vector<TableTestCase> testCases = {
         // Using exact values from your validation table
         {3.18, 207, 2.8, 1.3, 5.5},   // Row 1: Target E = 5.5%
