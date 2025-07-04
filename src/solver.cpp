@@ -29,6 +29,20 @@ double linearBetween(double x, double x1, double y1, double x2, double y2) {
 
 // Compute evaporation loss
 double solveEvaporationLoss(const Inputs& in) {
+    // Validate input parameters against physical limitations
+    if (in.vpd < 0.0 || in.vpd > 1.0) {
+        throw std::runtime_error("Vapor-Pressure Deficit must be between 0.0 and 1.0 psi");
+    }
+    if (in.nozzle < 8 || in.nozzle > 64) {
+        throw std::runtime_error("Nozzle diameter must be between 8 and 64 (64ths of an inch)");
+    }
+    if (in.pressure < 20 || in.pressure > 80) {
+        throw std::runtime_error("Nozzle pressure must be between 20 and 80 psi");
+    }
+    if (in.wind < 0 || in.wind > 15) {
+        throw std::runtime_error("Wind velocity must be between 0 and 15 mph");
+    }
+    
     // Tick data
     std::vector<std::pair<double, double>> S3 = {{0, 0}, {0.1, 0.221}, {0.2, 0.381}, {0.3, 0.508}, {0.4, 0.613}, {0.5, 0.695}, {0.6, 0.762}, {0.7, 0.829}, {0.8, 0.887}, {0.9, 0.949}, {1.0, 1.0}};
     std::vector<std::pair<double, double>> S5 = {{8, 1.002}, {10, 0.895}, {12, 0.815}, {14, 0.742}, {16, 0.675}, {20, 0.563}, {24, 0.483}, {32, 0.352}, {40, 0.233}, {48, 0.152}, {64, -0.001}};
@@ -61,6 +75,12 @@ double solveEvaporationLoss(const Inputs& in) {
     std::sort(S6_flip.begin(), S6_flip.end());
 
     double evapLoss = interpolate(S6_flip, yL);
+
+    // Validate output against physical limitations
+    if (evapLoss < 0.0 || evapLoss > 40.0) {
+        std::cout << "Warning: Calculated evaporation loss (" << evapLoss 
+                  << "%) is outside expected range (0-40%)" << std::endl;
+    }
 
     std::cout << "Evaporation Loss: " << evapLoss << "%" << std::endl;
     return evapLoss;

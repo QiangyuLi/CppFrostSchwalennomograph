@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🔧 Running Full Test Suite..."
+echo "🔧 Running Complete Test Suite..."
 echo ""
 
 # Test 1: Original solver
@@ -47,6 +47,28 @@ fi
 
 echo ""
 
+# Test 3: Validated solver
+echo "📋 Test 3: Validated Solver"
+echo "🔧 Compiling..."
+g++ -std=c++17 -o test_validated_solver test_validated_solver.cpp
+
+if [ $? -ne 0 ]; then
+    echo "❌ Validated solver compilation failed."
+    exit 1
+fi
+
+echo "✅ Running..."
+./test_validated_solver
+VALIDATED_EXIT_CODE=$?
+
+if [ $VALIDATED_EXIT_CODE -eq 0 ]; then
+    echo "✅ Validated solver test passed."
+else
+    echo "❌ Validated solver test failed."
+fi
+
+echo ""
+
 # Summary
 echo "📊 Test Summary:"
 if [ $ORIG_EXIT_CODE -eq 0 ]; then
@@ -59,6 +81,12 @@ if [ $COMPACT_EXIT_CODE -eq 0 ]; then
     echo "✅ Compact solver: PASSED"
 else
     echo "❌ Compact solver: FAILED"
+fi
+
+if [ $VALIDATED_EXIT_CODE -eq 0 ]; then
+    echo "✅ Validated solver: PASSED"
+else
+    echo "❌ Validated solver: FAILED"
 fi
 
 echo ""

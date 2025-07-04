@@ -2,11 +2,12 @@
 
 This project provides C++ implementations of the Frost & Schwalen nomograph method for estimating evaporation loss during sprinkler irrigation.
 
-**Two implementations are provided:**
-- **Full version**: Traditional multi-file structure with separate header and implementation
+**Three implementations are provided:**
+- **Full version**: Traditional multi-file structure with separate header and implementation  
 - **Compact version**: Single-header library for easy integration into other projects
+- **Validated version**: Single-header library with comprehensive input validation and error handling
 
-Both perform the same calculation by:
+All perform the same calculation by:
 
 * Interpolating vapor pressure deficit, nozzle diameter, pressure, and wind velocity values.
 * Computing geometric pivot points based on nomograph layout.
@@ -17,16 +18,65 @@ Both perform the same calculation by:
 ## ✅ Features
 
 * **Pure C++ implementation** - Uses standard library only
-* **Header-only compact version** - Easy integration, no linking required
+* **Multiple integration options** - Choose the version that fits your needs
+* **Input validation** - Ensures parameters are within physical limits
 * **Built-in interpolation logic** - No external dependencies
-* **Comprehensive test suite** - Both versions thoroughly tested
-* **Simple API** - Easy to use in existing projects
+* **Comprehensive test suite** - All versions thoroughly tested
+* **Error handling** - Graceful handling of invalid inputs
 
 ---
 
-## 🚀 Quick Start (Compact Version)
+## 📊 Physical Parameter Limits
 
-For easy integration into your project, use the compact single-header version:
+All versions respect the following physical constraints:
+
+| Parameter | Range | Units | Description |
+|-----------|-------|-------|-------------|
+| **VPD** | 0.0 to 1.0 | psi | Vapor-Pressure Deficit |
+| **Nozzle** | 8 to 64 | 64ths inch | Nozzle diameter (8/64" to 64/64") |
+| **Pressure** | 20 to 80 | psi | Nozzle pressure |
+| **Wind** | 0 to 15 | mph | Wind velocity |
+| **Output** | 0 to 40 | % | Expected evaporation loss range |
+
+---
+
+## 🚀 Quick Start
+
+### Validated Version (Recommended)
+
+For projects requiring robust input validation and error handling:
+
+```cpp
+#include "evap_solver_validated.h"
+#include <iostream>
+
+int main() {
+    // Method 1: Safe calculation (returns default on error)
+    double loss = EvapSolverValidated::calculateEvaporationLossSafe(0.6, 12, 40, 5, -1.0);
+    if (loss >= 0) {
+        std::cout << "Evaporation Loss: " << loss << "%" << std::endl;
+    } else {
+        std::cout << "Invalid input parameters" << std::endl;
+    }
+    
+    // Method 2: Validation result (detailed error info)
+    auto result = EvapSolverValidated::calculateEvaporationLossWithValidation(0.6, 12, 40, 5);
+    if (result.isValid) {
+        std::cout << "Evaporation Loss: " << result.calculatedValue << "%" << std::endl;
+        if (result.isOutOfRange) {
+            std::cout << "Warning: Result outside expected range (0-40%)" << std::endl;
+        }
+    } else {
+        std::cout << "Error: " << result.errorMessage << std::endl;
+    }
+    
+    return 0;
+}
+```
+
+### Compact Version (Fast Integration)
+
+For quick integration into existing projects:
 
 ```cpp
 #include "evap_solver_compact.h"
@@ -47,8 +97,8 @@ int main() {
 ```
 
 **Integration steps:**
-1. Copy `src/evap_solver_compact.h` to your project
-2. Include the header in your source files
+1. Copy the appropriate header file to your project
+2. Include the header in your source files  
 3. Compile with C++17 standard: `g++ -std=c++17 your_file.cpp`
 
 📖 **See [INTEGRATION.md](INTEGRATION.md) for detailed integration guide and examples.**
@@ -59,15 +109,8 @@ int main() {
 
 ### Full Version
 
-Make sure you have a C++ compiler installed (like `g++`):
-
 ```bash
 g++ -std=c++17 -o evap_solver src/main.cpp src/solver.cpp
-```
-
-Then run:
-
-```bash
 ./evap_solver
 ```
 
@@ -76,6 +119,13 @@ Then run:
 ```bash
 g++ -std=c++17 -o compact_example examples/compact_example.cpp
 ./compact_example
+```
+
+### Validated Version Example
+
+```bash
+g++ -std=c++17 -o validated_example examples/validated_example.cpp
+./validated_example
 ```
 
 ---
@@ -101,31 +151,75 @@ This will test both the full and compact versions.
 
 ---
 
-## 📋 API Reference (Compact Version)
+## 📋 API Reference
 
-### Namespace: `EvapSolver`
+### Validated Version (evap_solver_validated.h)
 
-#### Input Structure
+**Recommended for production use**
+
 ```cpp
-struct Input {
-    double vpd;      // Vapor-Pressure Deficit (psi)
-    int nozzle;      // Nozzle diameter (64ths inch)  
-    double pressure; // Pressure (psi)
-    double wind;     // Wind velocity (mph)
-};
+namespace EvapSolverValidated {
+    // Input with validation
+    struct Input {
+        double vpd, pressure, wind;
+        int nozzle;
+        Input(double vpd, int nozzle, double pressure, double wind); // Validates on construction
+    };
+    
+    // Validation result
+    struct ValidationResult {
+        bool isValid;
+        std::string errorMessage;
+        double calculatedValue;
+        bool isOutOfRange;
+    };
+    
+    // Calculator class
+    class Calculator {
+    public:
+        static ValidationResult calculateWithValidation(const Input& in);
+        static double calculate(const Input& in); // Throws on invalid input
+        static std::string getParameterRanges();
+    };
+    
+    // Convenience functions
+    ValidationResult calculateEvaporationLossWithValidation(double vpd, int nozzle, double pressure, double wind);
+    double calculateEvaporationLoss(double vpd, int nozzle, double pressure, double wind);
+    double calculateEvaporationLossSafe(double vpd, int nozzle, double pressure, double wind, double defaultValue);
+}
 ```
 
-#### Calculator Class
+### Compact Version (evap_solver_compact.h)
+
+**For quick integration**
+
 ```cpp
-class Calculator {
-public:
-    static double calculate(const Input& in);
-};
+namespace EvapSolver {
+    struct Input {
+        double vpd, pressure, wind;
+        int nozzle;
+    };
+    
+    class Calculator {
+    public:
+        static double calculate(const Input& in);
+    };
+    
+    double calculateEvaporationLoss(double vpd, int nozzle, double pressure, double wind);
+}
 ```
 
-#### Convenience Function
+### Full Version (solver.h + solver.cpp)
+
+**Traditional multi-file approach**
+
 ```cpp
-double calculateEvaporationLoss(double vpd, int nozzle, double pressure, double wind);
+struct Inputs {
+    double vpd, pressure, wind;
+    int nozzle;
+};
+
+double solveEvaporationLoss(const Inputs& in);
 ```
 
 ---
