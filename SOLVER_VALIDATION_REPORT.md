@@ -3,6 +3,15 @@
 Date: Jul  4 2025
 Test Suite: Multi-Solver Validation
 
+## Reference Citation
+
+The validation test cases are derived from:
+
+**Trimmer, Walter L.** (1987). "Sprinkler Evaporation Loss Equation." 
+*Journal of Irrigation and Drainage Engineering*, Vol. 113, Issue 4, pp. 616-624.
+https://doi.org/10.1061/(ASCE)0733-9437(1987)113:4(616)
+Published: November 1, 1987
+
 ## Executive Summary
 
 This report compares three different implementations of the evaporation loss solver:
